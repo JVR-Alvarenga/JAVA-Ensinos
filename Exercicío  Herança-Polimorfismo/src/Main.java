@@ -29,33 +29,23 @@ public class Main {
             System.out.print("Terceirizado (y/n)? ");
             char cargo = input.next().charAt(0);
 
+            System.out.print("Nome: ");
+            input.nextLine();
+            String name = input.nextLine();
+            
+            System.out.print("Horas: ");
+            int hours = input.nextInt();
+            
+            System.out.print("Valor por hora: ");
+            double valuePerHour = input.nextDouble();
+            
             if (cargo == 'y' || cargo == 'Y') {
-                System.out.print("Nome: ");
-                input.nextLine();
-                String name = input.nextLine();
-                
-                System.out.print("Horas: ");
-                int hours = input.nextInt();
-
-                System.out.print("Valor por hora: ");
-                double valuePerHour = input.nextDouble();
-
                 System.out.print("Custo adicional: ");
                 double additionalCharge = input.nextDouble();
 
                 OutsourceEmployee employee = new OutsourceEmployee(name, hours, valuePerHour, additionalCharge);
                 employees.add(employee);
-            } else if (cargo == 'n' || cargo == 'N') {
-                System.out.print("Nome: ");
-                input.nextLine();
-                String name = input.nextLine();
-                
-                System.out.print("Horas: ");
-                int hours = input.nextInt();
-
-                System.out.print("Valor por hora: ");
-                double valuePerHour = input.nextDouble();
-
+            } else {
                 Employee employee = new Employee(name, hours, valuePerHour);
                 employees.add(employee);
             }
