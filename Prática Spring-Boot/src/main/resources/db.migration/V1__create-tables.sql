@@ -1,0 +1,15 @@
+CREATE TABLE Users (
+    id LONG AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    telephone VARCHAR(20),
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Posts (
+    id LONG AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    content TEXT NOT NULL,
+    user_id LONG,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
