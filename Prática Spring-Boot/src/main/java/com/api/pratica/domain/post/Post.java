@@ -34,4 +34,9 @@ public class Post {
         this.content = data.content();
         this.user = user;
     }
+
+    public void updateData(DataUpdatePost data) {
+        if (data.title() != null) this.title = data.title();
+        if (data.content() != null) this.content = data.content();
+    }
 }
