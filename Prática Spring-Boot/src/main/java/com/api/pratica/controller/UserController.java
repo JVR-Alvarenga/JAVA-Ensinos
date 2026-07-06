@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -19,16 +20,19 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class UserController {
 
     private UserRepository repository;
+    private PasswordEncoder passwordEncoder;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.repository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     //Rotas -------------------------------------------------------------------------------
     @PostMapping("/register")
     @Transactional
     public ResponseEntity registerUser(@RequestBody @Valid DataRegisterUser data, UriComponentsBuilder uriBuilder) {
-        User user = new User(data);
+        String hashPassword = passwordEncoder.encode(data.password());
+        User user = new User(data, hashPassword);
         repository.save(user);
 
         var uri = uriBuilder.path("/users/detail/{id}").buildAndExpand(user.getId()).toUri();

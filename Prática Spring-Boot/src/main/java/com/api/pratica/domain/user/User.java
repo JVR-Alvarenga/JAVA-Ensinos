@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,11 +36,11 @@ public class User implements UserDetails {
     @Column(name = "active")
     private Boolean active;
 
-    public User(DataRegisterUser data) {
+    public User(DataRegisterUser data, String hashPassword) {
         this.name = data.name();
         this.telephone = data.telephone();
         this.email = data.email();
-        this.password = data.password();
+        this.password = hashPassword;
         this.active = true;
     }
 
