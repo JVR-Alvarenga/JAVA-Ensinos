@@ -5,8 +5,10 @@ import com.api.pratica.domain.post.DataRegisterPost;
 import com.api.pratica.domain.post.Post;
 import com.api.pratica.domain.post.DataUpdatePost;
 import com.api.pratica.domain.user.User;
+import com.api.pratica.infra.security.TokenService;
 import com.api.pratica.repository.PostRepository;
 import com.api.pratica.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -22,16 +24,21 @@ public class PostController {
 
     private UserRepository userRepository;
     private PostRepository postRepository;
+    private TokenService tokenService;
 
-    public PostController(UserRepository userRepository, PostRepository postRepository) {
+    public PostController(UserRepository userRepository, PostRepository postRepository, TokenService tokenService) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
+        this.tokenService = tokenService;
     }
 
     @PostMapping("/add")
     @Transactional
-    public ResponseEntity<DataDetailPost> addPost(@RequestBody @Valid DataRegisterPost data, UriComponentsBuilder uriBuilder) {
-        User user = userRepository.getReferenceById(data.userId());
+    public ResponseEntity<DataDetailPost> addPost(@RequestBody @Valid DataRegisterPost data, UriComponentsBuilder uriBuilder, HttpServletRequest token) {
+        String tokenHeader = token.getHeader("Authorization").replace("Bearer ", "").trim();
+
+        var userLogged = tokenService.getSubject(tokenHeader);
+        User user = (User) userRepository.findByEmail(userLogged);
         Post post = new Post(data, user);
         postRepository.save(post);
 
