@@ -1,6 +1,7 @@
 package com.reserva.salas.domain.employee;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -24,5 +25,18 @@ public class Employee {
     @Column(name = "password")
     private String password;
 
+    public Employee(DataRegisterEmployee data) {
+        this.name = data.name();
+        this.email = data.email();
+        this.position = data.position();
+        this.password = data.password();
+    }
 
+
+    public void update(@Valid DataUpdateEmployee data) {
+        if(data.name() != null) this.name = data.name();
+        if(data.email() != null) this.email = data.email();
+        if(data.password() != null) this.password = data.password();
+        if(data.position() != null) this.position = data.position();
+    }
 }

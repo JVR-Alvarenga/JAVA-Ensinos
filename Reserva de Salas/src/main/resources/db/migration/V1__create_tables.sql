@@ -1,13 +1,13 @@
-CREATE TABLE rooms (
+CREATE TABLE IF NOT EXISTS rooms (
                        id          BIGINT AUTO_INCREMENT PRIMARY KEY,
                        name        VARCHAR(100) NOT NULL,
                        is_busy     BOOLEAN      NOT NULL DEFAULT FALSE,
-                       capacity    INT          NOT NULL DEFAULT 8,
+                       capacity    INT          NOT NULL DEFAULT 6,
                        created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
                        updated_at  DATETIME     ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE employees (
+CREATE TABLE IF NOT EXISTS employees (
                            id          BIGINT AUTO_INCREMENT PRIMARY KEY,
                            name        VARCHAR(150) NOT NULL,
                            position       VARCHAR(100) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE employees (
                            updated_at  DATETIME     ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE reservations (
+CREATE TABLE IF NOT EXISTS reservations (
                               id            BIGINT AUTO_INCREMENT PRIMARY KEY,
                               room_id       BIGINT       NOT NULL,
                               employee_id   BIGINT       NOT NULL,
@@ -35,18 +35,42 @@ CREATE TABLE reservations (
 -- =============================================
 -- ÍNDICES para performance e regras de negócio
 -- =============================================
+-- O MySQL não suporta CREATE INDEX IF NOT EXISTS, então a existência
+-- do índice é verificada no information_schema antes de criá-lo.
 
 -- Índice para buscas rápidas por sala e horário
-CREATE INDEX idx_room_time ON reservations(room_id, start_time, end_time);
+SET @idx_exists := (SELECT COUNT(*) FROM information_schema.statistics
+                    WHERE table_schema = DATABASE()
+                      AND table_name = 'reservations'
+                      AND index_name = 'idx_room_time');
+SET @sql := IF(@idx_exists = 0,
+               'CREATE INDEX idx_room_time ON reservations(room_id, start_time, end_time)',
+               'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- Índice para verificar reservas de um funcionário
-CREATE INDEX idx_employee ON reservations(employee_id);
+SET @idx_exists := (SELECT COUNT(*) FROM information_schema.statistics
+                    WHERE table_schema = DATABASE()
+                      AND table_name = 'reservations'
+                      AND index_name = 'idx_employee');
+SET @sql := IF(@idx_exists = 0,
+               'CREATE INDEX idx_employee ON reservations(employee_id)',
+               'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- =============================================
 -- TRIGGERS / CHECKS (MySQL 8.0+)
 -- =============================================
 
 -- Impede reserva com data/hora passada
+-- DROP IF EXISTS + CREATE funciona em qualquer MySQL 8.0
+-- (CREATE TRIGGER IF NOT EXISTS só existe a partir do 8.0.29)
+DROP TRIGGER IF EXISTS before_reservation_insert;
+
 DELIMITER //
 CREATE TRIGGER before_reservation_insert BEFORE INSERT ON reservations
     FOR EACH ROW

@@ -1,6 +1,5 @@
 package com.reserva.salas.domain.reservation;
 import com.reserva.salas.domain.employee.Employee;
-import com.reserva.salas.domain.employee.Status;
 import com.reserva.salas.domain.room.Room;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,4 +39,18 @@ public class Reservation {
     @Column(name = "status")
     private Status status;
 
+    public Reservation(DataRegisterReservation data, Employee employee, Room room) {
+        this.employee = employee;
+        this.room = room;
+        this.startTime = data.startTime();
+        this.endTime = data.endTime();
+        this.status = Status.confirmed;
+    }
+
+    public void update(DataUpdateReservation data, Room room) {
+        if (room != null) this.room = room;
+        if (data.startTime() != null) this.startTime = data.startTime();
+        if (data.endTime() != null) this.endTime = data.endTime();
+        if (data.status() != null) this.status = data.status();
+    }
 }
